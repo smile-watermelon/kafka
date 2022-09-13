@@ -2,8 +2,10 @@ package com.smilewatermelon.kafka.basic;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 
 import java.util.Properties;
+import java.util.concurrent.Future;
 
 public class Producer {
 
@@ -24,7 +26,8 @@ public class Producer {
         for (int i = 0; i <10; i++) {
             ProducerRecord<String, String> record = new ProducerRecord<>(topic, "hello kafka" + i);
             try {
-                producer.send(record);
+                Future<RecordMetadata> future = producer.send(record);
+                RecordMetadata recordMetadata = future.get();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -33,5 +36,7 @@ public class Producer {
 
         producer.close();
     }
+
+
 
 }
