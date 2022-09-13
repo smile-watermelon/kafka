@@ -1,10 +1,12 @@
 package com.smilewatermelon.kafka.basic;
 
+import com.smilewatermelon.kafka.three.CustomConsumerInterceptor;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class ProducerConst {
@@ -44,5 +46,26 @@ public class ProducerConst {
         }
 
         producer.close();
+    }
+
+    /**
+     * 测试消费者拦截器
+     *
+     * @param producer
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    public static void testConsumerInterceptor(KafkaProducer<String, String> producer) throws ExecutionException, InterruptedException {
+        ProducerRecord<String, String> record = new ProducerRecord<>(topic, 0,
+                System.currentTimeMillis() - CustomConsumerInterceptor.expire_interval, null, "first-expire-data");
+        producer.send(record).get();
+
+        ProducerRecord<String, String> record1 = new ProducerRecord<>(topic, 0,
+                System.currentTimeMillis(), null, "normal-data");
+        producer.send(record).get();
+
+        ProducerRecord<String, String> record3 = new ProducerRecord<>(topic, 0,
+                System.currentTimeMillis() - CustomConsumerInterceptor.expire_interval, null, "last-expire-data");
+        producer.send(record).get();
     }
 }

@@ -12,6 +12,7 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,6 +21,8 @@ public class KafkaConsumerAnalysis {
     public static final String brokerList = "10.211.55.20:9092";
 
     public static final String topic = "demo";
+
+    public static final String topicTest = "test";
 
     public static final String clientId = "producer.client.demo";
     public static final String groupId = "group.demo";
@@ -42,7 +45,27 @@ public class KafkaConsumerAnalysis {
 
 
     public static void main(String[] args) {
+        consumerTopic();
 
+    }
+
+    public static void consumerMultiTopic() {
+        List<String> topicList = Arrays.asList(topic, topicTest);
+        Properties properties = initConfig();
+        KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
+        consumer.subscribe(topicList);
+
+        while (isRunning.get()) {
+            for (String topic : topicList) {
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+                for (ConsumerRecord<String, String> record : records.records(topic)) {
+                    System.out.println("topic = " + topic + " record = " + record.value());
+                }
+            }
+        }
+    }
+
+    public static void consumerTopic() {
         Properties properties = initConfig();
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Collections.singletonList(topic));

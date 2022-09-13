@@ -1,12 +1,12 @@
 package com.smilewatermelon.kafka.three;
 
-import com.smilewatermelon.kafka.second.Company;
+import com.smilewatermelon.kafka.two.Company;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
+import io.protostuff.runtime.RuntimeSchema;
 import org.apache.kafka.common.errors.SerializationException;
 import org.apache.kafka.common.serialization.Deserializer;
-import org.apache.kafka.common.serialization.Serializer;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -39,5 +39,19 @@ public class CompanyDeserializer implements Deserializer<Company> {
         address = new String(addressBytes, StandardCharsets.UTF_8);
 
         return new Company(name, address);
+    }
+
+    /**
+     * 使用protostuff 反序列化对象
+     *
+     * @param topic
+     * @param data
+     * @return
+     */
+    public Company protostuffDeserialize(String topic, byte[] data) {
+        Schema<Company> schema = RuntimeSchema.getSchema(Company.class);
+        Company company = new Company();
+        ProtostuffIOUtil.mergeFrom(data, company, schema);
+        return company;
     }
 }

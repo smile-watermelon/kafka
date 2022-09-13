@@ -1,11 +1,9 @@
-package com.smilewatermelon.kafka.second;
+package com.smilewatermelon.kafka.two;
 
 import org.apache.kafka.clients.producer.ProducerInterceptor;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.kafka.clients.producer.internals.ProducerInterceptors;
 
-import java.util.List;
 import java.util.Map;
 
 public class ProducerInterceptorPrefix implements ProducerInterceptor<String, String> {

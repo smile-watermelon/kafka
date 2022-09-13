@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.second;
+package com.smilewatermelon.kafka.two;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

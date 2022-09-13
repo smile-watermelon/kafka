@@ -1,6 +1,9 @@
-package com.smilewatermelon.kafka.second;
+package com.smilewatermelon.kafka.two;
 
-import lombok.Builder;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
+import io.protostuff.runtime.RuntimeSchema;
 import org.apache.kafka.common.serialization.Serializer;
 
 import java.nio.ByteBuffer;
@@ -30,5 +33,19 @@ public class CompanySerializer implements Serializer<Company> {
         buffer.putInt(address.length);
         buffer.put(address);
         return buffer.array();
+    }
+
+    public byte[] protostuffSerializer(String topic, Company company) {
+        Schema<? extends Company> schema = RuntimeSchema.getSchema(Company.class);
+        LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+        byte[] protostuff = null;
+
+        try {
+//            protostuff = ProtostuffIOUtil.toByteArray(company, schema, buffer);
+        } finally {
+            buffer.clear();
+        }
+
+        return protostuff;
     }
 }

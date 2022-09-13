@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.second;
+package com.smilewatermelon.kafka.two;
 
 import com.smilewatermelon.kafka.basic.ProducerConst;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -13,7 +13,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * 自定义序列化器
  */
-public class CustomSerializer {
+public class Test {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Properties properties = new Properties();

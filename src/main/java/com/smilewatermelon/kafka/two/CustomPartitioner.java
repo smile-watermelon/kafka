@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.second;
+package com.smilewatermelon.kafka.two;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
