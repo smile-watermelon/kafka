@@ -31,45 +31,45 @@ public class MultiThreadConsumer2 {
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+//        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
 
         return properties;
     }
 
     public static void main(String[] args) throws InterruptedException {
-//        multiThread();
+        multiThread();
 
-        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(iniConfig());
-        kafkaConsumer.subscribe(Collections.singleton(topic));
+//        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(iniConfig());
+//        kafkaConsumer.subscribe(Collections.singleton(topic));
 
-        while (true) {
-            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
-            Set<TopicPartition> partitions = records.partitions();
-            for (TopicPartition tp : partitions) {
-                List<ConsumerRecord<String, String>> tpRecords = records.records(tp);
-                for (ConsumerRecord<String, String> tpRecord : tpRecords) {
-                    System.out.println(Thread.currentThread().getName() + " " +tpRecord.topic() + " "+ tpRecord.partition() + " "+tpRecord.value());
-                }
-            }
-//            for (ConsumerRecord<String, String> record : records) {
-//                System.out.println(Thread.currentThread().getName() + " " +record.topic() + "  "+ record.partition() + " "+record.value());
+//        while (true) {
+//            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+//            Set<TopicPartition> partitions = records.partitions();
+//            for (TopicPartition tp : partitions) {
+//                List<ConsumerRecord<String, String>> tpRecords = records.records(tp);
+//                for (ConsumerRecord<String, String> tpRecord : tpRecords) {
+//                    System.out.println(Thread.currentThread().getName() + " " +tpRecord.topic() + " "+ tpRecord.partition() + " "+tpRecord.value());
+//                }
 //            }
-        }
+//        }
     }
 
     private static void multiThread() throws InterruptedException {
         Properties properties = iniConfig();
         int processors = Runtime.getRuntime().availableProcessors();
-        processors = 4;
+        int threadNumbers = processors = 3;
         KafkaConsumerThread kafkaConsumerThread =
                 new KafkaConsumerThread(properties, topic, processors);
 
-        kafkaConsumerThread.start();
+        ExecutorService executorService = new ThreadPoolExecutor(threadNumbers, threadNumbers, 0L, TimeUnit.SECONDS, new
+                ArrayBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+//        kafkaConsumerThread.start();
+        executorService.submit(kafkaConsumerThread);
     }
 
     public static class KafkaConsumerThread extends Thread {
         private final KafkaConsumer<String, String> kafkaConsumer;
-        private final ExecutorService executorService;
+        //        private final ExecutorService executorService;
         private final Integer threadNumbers;
         final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
@@ -101,14 +101,14 @@ public class MultiThreadConsumer2 {
             this.kafkaConsumer.poll(Duration.ofMillis(10000));
             Set<TopicPartition> assignment = this.kafkaConsumer.assignment();
             for (TopicPartition topicPartition : assignment) {
-                System.out.println(topicPartition.topic() + " " + topicPartition.partition()+"....");
-                this.kafkaConsumer.seek(topicPartition, 0);
+                System.out.println(topicPartition.topic() + " " + topicPartition.partition() + "....");
+//                this.kafkaConsumer.seek(topicPartition, 0);
             }
-            TimeUnit.SECONDS.sleep(5);
+//            TimeUnit.SECONDS.sleep(5);
             this.threadNumbers = threadNumbers;
 
-            executorService = new ThreadPoolExecutor(this.threadNumbers, this.threadNumbers, 0L, TimeUnit.SECONDS, new
-                    ArrayBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
+//            executorService = new ThreadPoolExecutor(this.threadNumbers, this.threadNumbers, 0L, TimeUnit.SECONDS, new
+//                    ArrayBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
         }
 
         @Override
@@ -116,15 +116,21 @@ public class MultiThreadConsumer2 {
             try {
 
                 while (isRunning.get()) {
-                    ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+                    int count = 0;
+                    ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(1000));
                     if (!records.isEmpty()) {
-                        executorService.submit(new RecordsHandler(records, currentOffsets, this.kafkaConsumer));
+                        for (ConsumerRecord<String, String> record : records) {
+                            count++;
+                            System.out.println(Thread.currentThread().getName() + " " + record.topic() + "  " + record.partition() + " " + record.value());
+                        }
+//                        executorService.submit(new RecordsHandler(records, currentOffsets, this.kafkaConsumer));
 //                        synchronized (currentOffsets) {
 //                            if (!currentOffsets.isEmpty()) {
 //                                kafkaConsumer.commitSync(currentOffsets);
 //                            }
 //                        }
                     }
+                    System.out.println(count+"...");
                 }
             } catch (Exception e) {
 
@@ -139,6 +145,7 @@ public class MultiThreadConsumer2 {
         private final Map<TopicPartition, OffsetAndMetadata> currentOffsets;
 
         private final KafkaConsumer<String, String> kafkaConsumer;
+
         public RecordsHandler(ConsumerRecords<String, String> records, Map<TopicPartition, OffsetAndMetadata> currentOffsets, KafkaConsumer kafkaConsumer) {
             this.records = records;
             this.currentOffsets = currentOffsets;
@@ -148,7 +155,7 @@ public class MultiThreadConsumer2 {
         @Override
         public void run() {
             for (ConsumerRecord<String, String> record : records) {
-                System.out.println(Thread.currentThread().getName() + " " +record.topic() + "  "+ record.partition() + " "+record.value());
+                System.out.println(Thread.currentThread().getName() + " " + record.topic() + "  " + record.partition() + " " + record.value());
                 this.kafkaConsumer.commitSync();
             }
 
@@ -185,7 +192,6 @@ public class MultiThreadConsumer2 {
             }
         }
     }
-
 
 
 }
