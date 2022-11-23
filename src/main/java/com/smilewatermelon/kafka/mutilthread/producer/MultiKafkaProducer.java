@@ -24,7 +24,7 @@ import java.util.concurrent.*;
  */
 public class MultiKafkaProducer {
 
-//        public static final String brokerList = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
+    //        public static final String brokerList = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
     public static final String brokerList = "10.211.55.20:9092";
     public static final String topic = "group-demo";
     public static final ExecutorService executors = Executors.newFixedThreadPool(5);
@@ -34,10 +34,10 @@ public class MultiKafkaProducer {
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-//        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client1");
+        properties.put(ProducerConfig.CLIENT_ID_CONFIG, "producer.client1");
 //        properties.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 60000);
-//        properties.put(ProducerConfig.ACKS_CONFIG, "1");
-//        properties.put(ProducerConfig.RETRIES_CONFIG, 3);
+        properties.put(ProducerConfig.ACKS_CONFIG, "1");
+        properties.put(ProducerConfig.RETRIES_CONFIG, 3);
 //        properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 81920);
 //        properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION)
 
@@ -49,7 +49,7 @@ public class MultiKafkaProducer {
         int threadNumber = 5;
 
 //        for (int i = 0; i < threadNumber; i++) {
-//        executors.execute(new KafkaProducerThread(initConfig(), topic));
+//        executors.submit(new KafkaProducerThread(initConfig(), topic));
 
 //        }
 
@@ -61,17 +61,17 @@ public class MultiKafkaProducer {
         Random random = new Random();
         ObjectMapper objectMapper = new ObjectMapper();
         KafkaProducer<String, String> kafkaProducer = new KafkaProducer<>(initConfig());
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 4; i++) {
             try {
                 User user = User.builder().age(random.nextInt(30))
                         .name("guagua" + i)
                         .email("1@qq.com").build();
                 String value = objectMapper.writeValueAsString(user);
-                System.out.println(value + " "+value.getBytes(StandardCharsets.UTF_8).length);
+                System.out.println(value + " " + value.getBytes(StandardCharsets.UTF_8).length);
 
 
-                ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, 3, "", value);
-//                ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, 0, "p1", "hello lady ke...");
+//                ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,  value);
+                ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic, 2, "","hello lady ke...");
 
                 Future<RecordMetadata> send = kafkaProducer.send(producerRecord);
 
@@ -103,19 +103,19 @@ public class MultiKafkaProducer {
             ObjectMapper objectMapper = new ObjectMapper();
             System.out.println("exec...");
             try {
-                for (int i = 0; i < 10000; i++) {
+                for (int i = 0; i < 4; i++) {
                     User user = User.builder().age(random.nextInt())
                             .name("guagua" + i)
                             .email("1@qq.com").build();
                     String value = objectMapper.writeValueAsString(user);
-                    System.out.println(this.topics +" "+value);
+                    System.out.println(this.topics + " " + value);
 //                    ProducerRecord<String, String> producerRecord = new ProducerRecord<>(this.topics, 1, "p1", value);
                     ProducerRecord<String, String> producerRecord = new ProducerRecord<>(this.topics, value);
                     Future<RecordMetadata> send = this.kafkaProducer.send(producerRecord);
-                    RecordMetadata metadata = send.get();
-                    System.out.println(Thread.currentThread().getName() + " " + metadata.topic() + " " + metadata.partition() + " " + metadata.offset());
+//                    RecordMetadata metadata = send.get();
+//                    System.out.println(Thread.currentThread().getName() + " " + metadata.topic() + " " + metadata.partition() + " " + metadata.offset());
                 }
-            } catch (JsonProcessingException | InterruptedException | ExecutionException e) {
+            } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             } finally {
                 this.kafkaProducer.close();

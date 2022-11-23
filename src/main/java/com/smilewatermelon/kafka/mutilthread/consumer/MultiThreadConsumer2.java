@@ -37,9 +37,30 @@ public class MultiThreadConsumer2 {
     }
 
     public static void main(String[] args) throws InterruptedException {
+//        multiThread();
+
+        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<>(iniConfig());
+        kafkaConsumer.subscribe(Collections.singleton(topic));
+
+        while (true) {
+            ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+            Set<TopicPartition> partitions = records.partitions();
+            for (TopicPartition tp : partitions) {
+                List<ConsumerRecord<String, String>> tpRecords = records.records(tp);
+                for (ConsumerRecord<String, String> tpRecord : tpRecords) {
+                    System.out.println(Thread.currentThread().getName() + " " +tpRecord.topic() + " "+ tpRecord.partition() + " "+tpRecord.value());
+                }
+            }
+//            for (ConsumerRecord<String, String> record : records) {
+//                System.out.println(Thread.currentThread().getName() + " " +record.topic() + "  "+ record.partition() + " "+record.value());
+//            }
+        }
+    }
+
+    private static void multiThread() throws InterruptedException {
         Properties properties = iniConfig();
         int processors = Runtime.getRuntime().availableProcessors();
-        processors = 3;
+        processors = 4;
         KafkaConsumerThread kafkaConsumerThread =
                 new KafkaConsumerThread(properties, topic, processors);
 
@@ -81,7 +102,7 @@ public class MultiThreadConsumer2 {
             Set<TopicPartition> assignment = this.kafkaConsumer.assignment();
             for (TopicPartition topicPartition : assignment) {
                 System.out.println(topicPartition.topic() + " " + topicPartition.partition()+"....");
-//                this.kafkaConsumer.seek(topicPartition, 0);
+                this.kafkaConsumer.seek(topicPartition, 0);
             }
             TimeUnit.SECONDS.sleep(5);
             this.threadNumbers = threadNumbers;
@@ -126,6 +147,14 @@ public class MultiThreadConsumer2 {
 
         @Override
         public void run() {
+            for (ConsumerRecord<String, String> record : records) {
+                System.out.println(Thread.currentThread().getName() + " " +record.topic() + "  "+ record.partition() + " "+record.value());
+                this.kafkaConsumer.commitSync();
+            }
+
+        }
+
+        public void run1() {
 //            for (ConsumerRecord<String, String> record : records) {
 //                System.out.println(record.value());
 //            }
@@ -141,7 +170,7 @@ public class MultiThreadConsumer2 {
                 HashMap<TopicPartition, OffsetAndMetadata> map = new HashMap<>();
                 map.put(tp, new OffsetAndMetadata(lastConsumedOffset + 1));
 
-//                this.kafkaConsumer.commitSync(map);
+                this.kafkaConsumer.commitSync(map);
 //                synchronized (currentOffsets) {
 //                    if (!currentOffsets.containsKey(tp)) {
 //                        OffsetAndMetadata offsetAndMetadata = new OffsetAndMetadata(lastConsumedOffset + 1);
@@ -156,5 +185,7 @@ public class MultiThreadConsumer2 {
             }
         }
     }
+
+
 
 }

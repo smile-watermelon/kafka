@@ -1,6 +1,7 @@
 package com.smilewatermelon.kafka.admin;
 
 import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.DeleteTopicsResult;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -31,7 +32,19 @@ public class KafkaAdminClient {
     }
 
     public static void main(String[] args) {
-        NewTopic newTopic = getTopic(topic, 3, 1);
+//        createTopic();
+        String topicName = "group-demo";
+        deleteTopic(topicName);
+    }
+
+    private static void deleteTopic(String topicName) {
+        AdminClient adminClient = AdminClient.create(iniConfig());
+        DeleteTopicsResult result = adminClient.deleteTopics(Collections.singleton(topicName));
+        System.out.println(result.all());
+    }
+
+    private static void createTopic() {
+        NewTopic newTopic = getTopic(topic, 4, 1);
         AdminClient adminClient = AdminClient.create(iniConfig());
         try {
             adminClient.createTopics(Collections.singleton(newTopic));
