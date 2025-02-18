@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
 import com.smilewatermelon.kafka.basic.ConsumerConst;
 import org.apache.kafka.clients.consumer.*;
@@ -23,22 +23,23 @@ public class MultiThreadConsumer1 {
 
         int consumerThreadNum = 4;
 //        for (int i = 0; i < consumerThreadNum; i++) {
-        new kafkaConsumerThread(properties, ConsumerConst.topic, consumerThreadNum).start();
+        new kafkaConsumerThread(properties, ConsumerConst.TOPIC, consumerThreadNum).start();
 //        }
     }
 
     public static class kafkaConsumerThread extends Thread {
-        private KafkaConsumer<String, String> kafkaConsumer;
-        private ExecutorService executorService;
-        private int threadNum;
+        private final KafkaConsumer<String, String> kafkaConsumer;
+        private final ExecutorService executorService;
 
-        private HashMap<TopicPartition, OffsetAndMetadata> offsets;
+        private final HashMap<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
+
+        private Integer threadNum;
 
         public kafkaConsumerThread(Properties properties, String topic, int threadNum) {
             kafkaConsumer = new KafkaConsumer<>(properties);
             this.kafkaConsumer.subscribe(Collections.singleton(topic));
             this.threadNum = threadNum;
-            this.executorService = new ThreadPoolExecutor(threadNum, threadNum, 0L, TimeUnit.MICROSECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.CallerRunsPolicy());
+            this.executorService = new ThreadPoolExecutor(threadNum, this.threadNum, 0L, TimeUnit.MICROSECONDS, new ArrayBlockingQueue<>(1000), new ThreadPoolExecutor.CallerRunsPolicy());
         }
 
         public void run() {
@@ -61,7 +62,7 @@ public class MultiThreadConsumer1 {
     public static class RecordHandler extends Thread {
         public final ConsumerRecords<String, String> records;
 
-        private HashMap<TopicPartition, OffsetAndMetadata> offsets;
+        private final HashMap<TopicPartition, OffsetAndMetadata> offsets;
 
         public RecordHandler(ConsumerRecords<String, String> records, HashMap<TopicPartition, OffsetAndMetadata> offsets) {
             this.records = records;
@@ -74,6 +75,8 @@ public class MultiThreadConsumer1 {
             for (TopicPartition topicPartition : records.partitions()) {
                 List<ConsumerRecord<String, String>> partitionRecords = records.records(topicPartition);
                 long lastConsumedOffset = partitionRecords.get(partitionRecords.size() - 1).offset();
+                // kafkaConsumerThread 父类对象的 offset 引用传递到子线程中，子线程修改位移数据，
+                // 子线程消费结束后，父线程提交位移。
                 synchronized (offsets) {
                     if (!offsets.containsKey(topicPartition)) {
                         offsets.put(topicPartition, new OffsetAndMetadata(lastConsumedOffset + 1));

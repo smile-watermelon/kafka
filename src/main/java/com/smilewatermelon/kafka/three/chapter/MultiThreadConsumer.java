@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
 import com.smilewatermelon.kafka.basic.ConsumerConst;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -21,11 +21,20 @@ public class MultiThreadConsumer {
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
 
         int consumerThreadNum = 4;
-        for (int i = 0; i < consumerThreadNum; i++) {
-            new kafkaConsumerThread(properties, ConsumerConst.topic).start();
+        int processors = Runtime.getRuntime().availableProcessors();
+
+        for (int i = 0; i < processors; i++) {
+            kafkaConsumerThread thread = new kafkaConsumerThread(properties, ConsumerConst.TOPIC);
+            thread.setName("MultiThreadConsumer" + i);
+            thread.start();
+
         }
     }
 
+    /**
+     * 线程封闭
+     * 每个线程都实例化一个kafkaConsumer 实例，每个线性相当于一个消费者，同属于一个消费者组，线程数量受限于主题的分区数量
+     */
     public static class kafkaConsumerThread extends Thread {
         private KafkaConsumer<String, String> kafkaConsumer;
 

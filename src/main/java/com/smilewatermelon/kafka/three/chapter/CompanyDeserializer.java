@@ -1,6 +1,6 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
-import com.smilewatermelon.kafka.two.Company;
+import com.smilewatermelon.kafka.two.chapter.Company;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;

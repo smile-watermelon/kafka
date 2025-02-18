@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
 
 import com.smilewatermelon.kafka.basic.ConsumerConst;

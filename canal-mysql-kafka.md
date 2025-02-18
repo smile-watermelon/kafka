@@ -1,0 +1,90 @@
+### mysql binlog 被解析后的到kafka 的格式
+
+```json
+{
+    "data":[
+        {
+            "id":"1",
+            "title":"22",
+            "tags":"111",
+            "descrtion":"11",
+            "thumbs_up":"0",
+            "view_num":"0",
+            "sort":null,
+            "state":"1",
+            "es_id":null,
+            "catalog_id":"32",
+            "surfaceplot":"operations-server/2023-04-28/59a8c1c4668a471ab9696a838b02129a/座位图.png",
+            "is_banner":"1",
+            "banner":"operations-server/2023-04-28/59a8c1c4668a471ab9696a838b02129a/座位图.png",
+            "version":"0",
+            "type":"1",
+            "creator":"0",
+            "modifier":"0",
+            "created":"2023-05-23 13:19:47",
+            "modified":"2023-05-23 11:41:52",
+            "ext":"1"
+        }
+    ],
+    "database":"test",
+    "es":1695113695000,
+    "id":2,
+    "isDdl":false,
+    "mysqlType":{
+        "id":"bigint unsigned",
+        "title":"varchar(32)",
+        "tags":"varchar(255)",
+        "descrtion":"varchar(100)",
+        "thumbs_up":"int",
+        "view_num":"int",
+        "sort":"int",
+        "state":"tinyint(1)",
+        "es_id":"varchar(255)",
+        "catalog_id":"bigint",
+        "surfaceplot":"varchar(255)",
+        "is_banner":"tinyint(1)",
+        "banner":"varchar(255)",
+        "version":"int",
+        "type":"tinyint",
+        "creator":"bigint",
+        "modifier":"bigint",
+        "created":"datetime",
+        "modified":"datetime",
+        "ext":"INT"
+    },
+    "old":[
+        {
+            "title":"11"
+        }
+    ],
+    "pkNames":[
+        "id"
+    ],
+    "sql":"",
+    "sqlType":{
+        "id":-5,
+        "title":12,
+        "tags":12,
+        "descrtion":12,
+        "thumbs_up":4,
+        "view_num":4,
+        "sort":4,
+        "state":-6,
+        "es_id":12,
+        "catalog_id":-5,
+        "surfaceplot":12,
+        "is_banner":-6,
+        "banner":12,
+        "version":4,
+        "type":-6,
+        "creator":-5,
+        "modifier":-5,
+        "created":93,
+        "modified":93,
+        "ext":4
+    },
+    "table":"article",
+    "ts":1695113696035,
+    "type":"UPDATE"
+}
+```

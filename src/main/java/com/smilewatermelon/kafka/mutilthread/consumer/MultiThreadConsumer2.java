@@ -20,17 +20,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MultiThreadConsumer2 {
 
-    public static final String brokerList = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
-    public static final String topic = "group-demo";
-    public static final String groupId = "group.demo";
+    public static final String BROKER_LIST = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
+    public static final String TOPIC = "group-demo";
+    public static final String GROUP_ID = "group.demo";
 
 
     public static Properties iniConfig() {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
 //        properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
 
         return properties;
@@ -59,7 +59,7 @@ public class MultiThreadConsumer2 {
         int processors = Runtime.getRuntime().availableProcessors();
         int threadNumbers = processors = 3;
         KafkaConsumerThread kafkaConsumerThread =
-                new KafkaConsumerThread(properties, topic, processors);
+                new KafkaConsumerThread(properties, TOPIC, processors);
 
         ExecutorService executorService = new ThreadPoolExecutor(threadNumbers, threadNumbers, 0L, TimeUnit.SECONDS, new
                 ArrayBlockingQueue<>(10000), new ThreadPoolExecutor.CallerRunsPolicy());
@@ -146,7 +146,7 @@ public class MultiThreadConsumer2 {
 
         private final KafkaConsumer<String, String> kafkaConsumer;
 
-        public RecordsHandler(ConsumerRecords<String, String> records, Map<TopicPartition, OffsetAndMetadata> currentOffsets, KafkaConsumer kafkaConsumer) {
+        public RecordsHandler(ConsumerRecords<String, String> records, Map<TopicPartition, OffsetAndMetadata> currentOffsets, KafkaConsumer<String, String> kafkaConsumer) {
             this.records = records;
             this.currentOffsets = currentOffsets;
             this.kafkaConsumer = kafkaConsumer;

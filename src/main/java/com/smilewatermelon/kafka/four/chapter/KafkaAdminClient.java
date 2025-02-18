@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.admin;
+package com.smilewatermelon.kafka.four.chapter;
 
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.DeleteTopicsResult;

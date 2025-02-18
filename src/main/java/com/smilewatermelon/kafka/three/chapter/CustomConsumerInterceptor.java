@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
 import org.apache.kafka.clients.consumer.ConsumerInterceptor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

@@ -17,16 +17,16 @@ import java.util.Properties;
  * @describe
  */
 public class MultiThreadConsumer1 {
-    public static final String brokerList = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
-    public static final String topic = "topic-demo";
-    public static final String groupId = "group.demo";
+    public static final String BROKER_LIST = "10.211.55.20:9092,10.211.55.21:9092,10.211.55.22:9092";
+    public static final String TOPIC = "topic-demo";
+    public static final String GROUP_ID = "group.demo";
 
     public static Properties iniConfig() {
         Properties properties = new Properties();
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BROKER_LIST);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, GROUP_ID);
         properties.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
 
         return properties;
@@ -36,7 +36,7 @@ public class MultiThreadConsumer1 {
         Properties properties = iniConfig();
         int consumerThreadNum = 4;
         for (int i = 0; i < consumerThreadNum; i++) {
-            new KafkaConsumerThread(properties, topic).start();
+            new KafkaConsumerThread(properties, TOPIC).start();
         }
     }
 

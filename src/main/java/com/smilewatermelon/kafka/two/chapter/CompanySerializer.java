@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.two;
+package com.smilewatermelon.kafka.two.chapter;
 
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
@@ -35,14 +35,16 @@ public class CompanySerializer implements Serializer<Company> {
         return buffer.array();
     }
 
-    public byte[] protostuffSerializer(String topic, Company company) {
-        Schema<? extends Company> schema = RuntimeSchema.getSchema(Company.class);
+    public byte[] protostuffSerializer(String topic, Company data) {
+        Schema<Company> schema = RuntimeSchema.getSchema(Company.class);
         LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
         byte[] protostuff = null;
 
         try {
-//            protostuff = ProtostuffIOUtil.toByteArray(company, schema, buffer);
-        } finally {
+            protostuff = ProtostuffIOUtil.toByteArray(data, schema, buffer);
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
             buffer.clear();
         }
 

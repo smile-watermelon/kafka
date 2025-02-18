@@ -1,0 +1,39 @@
+dataSourceKey: defaultDS
+destination: example
+outerAdapterKey: esKey
+groupId: g1
+esMapping:
+  _index: ope_article
+  _type: _doc
+  _id: _id
+  upsert: true
+  #pk: _id
+  sql: "
+  select
+    a.id as _id,
+    a.id,
+    a.title,
+    a.tags,
+    a.type,
+    a.descrtion,
+    a.thumbs_up,
+    a.view_num,
+    a.sort,
+    a.state,
+    a.es_id,
+    a.catalog_id,
+    a.surfaceplot,
+    a.is_banner,
+    a.banner,
+    a.version,
+    a.creator,
+    a.modifier,
+    a.created,
+    a.modified,
+    ac.body
+    from article as a left join article_content as ac on a.id = ac.article_id
+  "
+  # objFields:
+  #  tags: array:,
+  #  etlCondition: "where a.c_time>={}"
+  commitBatch: 3000

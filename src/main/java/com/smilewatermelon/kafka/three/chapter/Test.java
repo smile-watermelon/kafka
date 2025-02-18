@@ -1,40 +1,48 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
-import com.smilewatermelon.kafka.basic.Consumer;
 import com.smilewatermelon.kafka.basic.ConsumerConst;
-import com.smilewatermelon.kafka.basic.ProducerConst;
-import com.smilewatermelon.kafka.two.Company;
-import com.smilewatermelon.kafka.two.CompanySerializer;
-import com.smilewatermelon.kafka.two.ProducerInterceptorPrefix;
 import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.*;
 
 /**
  * 3.2.5 位移提交
+ *
+ * @author guagua
  */
 public class Test {
+
+    private static final Logger logger = LoggerFactory.getLogger(Test.class);
+
+    private static volatile boolean isRunning = true;
+
+    public static void setIsRunning(boolean isRun) {
+        isRunning = isRun;
+    }
 
 
     public static void main(String[] args) {
         Properties properties = ConsumerConst.initConfig();
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, ConsumerConst.groupId);
+        properties.put(ConsumerConfig.GROUP_ID_CONFIG, ConsumerConst.GROUP_ID);
+        properties.put(ConsumerConfig.CLIENT_ID_CONFIG, ConsumerConst.CLIENT_ID);
 
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
 
-        commitOffset(consumer);
+//        commitOffset(consumer);
+        commitParameters(consumer);
     }
 
+    /**
+     * 同步提交，按照批次提交
+     * @param consumer
+     */
     public static void commitOffset(KafkaConsumer<String, String> consumer) {
 
-        TopicPartition tp = new TopicPartition(ConsumerConst.topic, 0);
+        TopicPartition tp = new TopicPartition(ConsumerConst.TOPIC, 0);
         Set<TopicPartition> singleton = Collections.singleton(tp);
 
 
@@ -43,8 +51,9 @@ public class Test {
 
         // 当前消费到的位移
         long lastConsumedOffset = -1;
-        while (true) {
+        while (isRunning) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+            // ToDo 如果是一只需要拉取数据，这个不应该break掉。
             if (records.isEmpty()) {
                 break;
             }
@@ -68,7 +77,7 @@ public class Test {
      * @param consumer
      */
     public static void batchCommit(KafkaConsumer consumer) {
-        TopicPartition tp = new TopicPartition(ConsumerConst.topic, 0);
+        TopicPartition tp = new TopicPartition(ConsumerConst.TOPIC, 0);
         Set<TopicPartition> singleton = Collections.singleton(tp);
 
         final int minBatchSize = 200;
@@ -93,39 +102,52 @@ public class Test {
     }
 
     /**
+     * 单条提交位移
      * 带参数同步位移
      */
-    public static void commitParameters(KafkaConsumer consumer) {
+    public static void commitParameters(KafkaConsumer<String, String> consumer) {
+        consumer.subscribe(Collections.singletonList("topic-demo"));
+
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
             for (ConsumerRecord<String, String> record : records) {
                 long offset = record.offset();
+                logger.info("当前数据的offset，value=" + record.value() + " offset=" + offset);
                 TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-
                 consumer.commitSync(Collections.singletonMap(topicPartition, new OffsetAndMetadata(offset + 1)));
             }
         }
     }
 
     /**
+     * 按照分区提交位移
+     * 同步提交 偏移量
      * 按照分区粒度提交位移
      */
-    public static void commitPartition(KafkaConsumer consumer) {
+    public static void commitPartition(KafkaConsumer<String, String> consumer) {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
             Set<TopicPartition> partitions = records.partitions();
             for (TopicPartition partition : partitions) {
+                // 获取指定分区种的数据
                 List<ConsumerRecord<String, String>> partitionRecords = records.records(partition);
                 for (ConsumerRecord<String, String> record : partitionRecords) {
                     // do something
+                    String value = record.value();
                 }
                 long offset = partitionRecords.get(partitionRecords.size() - 1).offset();
                 consumer.commitSync(Collections.singletonMap(partition, new OffsetAndMetadata(offset + 1)));
+
             }
         }
     }
 
-    public static void commitAsync(KafkaConsumer consumer) {
+    /**
+     * 异步提交，设置回到函数
+     *
+     * @param consumer
+     */
+    public static void commitAsync(KafkaConsumer<String, String> consumer) {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
             for (ConsumerRecord<String, String> record : records) {
@@ -145,17 +167,17 @@ public class Test {
         }
     }
     /** 最后把关
-    try {
-        while (isRunning.get()) {
+     try {
+     while (isRunning.get()) {
 
-            consumer.commitAsync();
-        }
-    } final {
-        try {
-            consumer.commitAsync();
-        } finally {
-            consumer.close();
-        }
-    }
-    */
+     consumer.commitAsync();
+     }
+     } final {
+     try {
+     consumer.commitSync();
+     } finally {
+     consumer.close();
+     }
+     }
+     */
 }

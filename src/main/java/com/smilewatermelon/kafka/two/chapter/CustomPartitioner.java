@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.two;
+package com.smilewatermelon.kafka.two.chapter;
 
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
@@ -24,6 +24,7 @@ public class CustomPartitioner implements Partitioner {
         if (null == keyBytes) {
             return counter.getAndIncrement() % size;
         } else {
+            // kafka中默认的分区hash算法murmur2
             return Utils.toPositive(Utils.murmur2(keyBytes)) % size;
         }
     }

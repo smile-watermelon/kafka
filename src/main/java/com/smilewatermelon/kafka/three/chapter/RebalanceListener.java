@@ -1,4 +1,4 @@
-package com.smilewatermelon.kafka.three;
+package com.smilewatermelon.kafka.three.chapter;
 
 
 import com.smilewatermelon.kafka.basic.ConsumerConst;
@@ -21,12 +21,13 @@ public class RebalanceListener {
         Properties properties = ConsumerConst.initConfig();
         KafkaConsumer<String, String> consumer = new KafkaConsumer<>(properties);
 
+        rebalanceConsumer(consumer);
     }
 
     public static void rebalanceConsumer(KafkaConsumer<String, String> consumer) {
         HashMap<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
-        consumer.subscribe(Arrays.asList(ConsumerConst.topic), new ConsumerRebalanceListener() {
+        consumer.subscribe(Arrays.asList(ConsumerConst.TOPIC), new ConsumerRebalanceListener() {
             @Override
             public void onPartitionsRevoked(Collection<TopicPartition> partitions) {
                 consumer.commitSync(currentOffsets);
