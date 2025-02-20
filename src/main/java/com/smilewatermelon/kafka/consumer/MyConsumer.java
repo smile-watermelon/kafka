@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class MyConsumer {
 
 //    @KafkaListener(id = "c1", topics = {"example"}, containerFactory = "KafkaListenerContainerFactory")
-    @KafkaListener(id = "c1", topics = "example")
+    @KafkaListener(id = "c1", topics = "example", clientIdPrefix = "myconsumer")
     public void listen(UserEntity user) {
         System.out.println(user);
     }
